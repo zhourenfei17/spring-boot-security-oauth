@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jackeroo.oauth.dao.OauthUserMapper">
+
+
+    <select id="getUserByAccount" resultMap="OauthUserMap">
+        select a.id,a.account,a.user_name,a.password,a.phone,a.gender,a.status,a.del_flag,
+          c.id as 'roleId',c.role_code,c.role_name
+        from oauth_user a
+        left join oauth_user_role b on a.id=b.user_id
+        left join oauth_role c on b.role_id=c.id
+        where a.account=#{account}
+    </select>
+
+    <resultMap id="OauthUserMap" type="com.jackeroo.oauth.entity.OauthUser">
+        <id column="id" property="id" />
+        <result column="account" property="account"/>
+        <result column="user_name" property="userName" />
+        <result column="password" property="password" />
+        <result column="phone" property="phone" />
+        <result column="gender" property="gender" />
+        <result column="status" property="status" />
+        <result column="del_flag" property="delFlag" />
+
+        <collection property="roleList" ofType="com.jackeroo.oauth.entity.OauthRole">
+            <id column="roleId" property="id"/>
+            <result column="role_code" property="roleCode" />
+            <result column="role_name" property="roleName" />
+        </collection>
+    </resultMap>
+</mapper>

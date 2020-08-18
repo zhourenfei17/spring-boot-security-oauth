@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>首页</title>
+    <link th:href="@{/antd/dist/antd.css}" rel="stylesheet">
+
+    <script th:src="@{/vue/vue.min.js}"></script>
+    <script th:src="@{/antd/dist/antd.min.js}"></script>
+    <script th:src="@{/vue/moment.min.js}"></script>
+    <script th:src="@{/vue/jquery.min.js}"></script>
+</head>
+<body>
+    <div id="app" style="width: 100vw;height: 100vh;background-color: #b4e0ff;">
+        <a-result status="success" title="登录成功" sub-title="欢迎进入OAUTH2.0统一认证系统">
+            <template #extra>
+                <a-button @click="logout">
+                    退出登录
+                </a-button>
+            </template>
+
+            <div class="desc">
+                <p><a href="/oauthTest">oauth2.0授权接口测试 &gt;</a></p>
+                <p><a href="/resourceTest">资源服务器接口测试 &gt;</a></p>
+            </div>
+        </a-result>
+
+        <form id="logoutForm" th:action="@{/logout}" method="post"></form>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            methods: {
+                logout: function(){
+                    //window.location.href = '/logout'
+                    $('#logoutForm').submit()
+                }
+            }
+        })
+    </script>
+</body>
+</html>

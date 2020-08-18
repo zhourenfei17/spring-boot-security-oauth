@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>统一认证登录页面</title>
+
+    <link th:href="@{/antd/dist/antd.css}" rel="stylesheet">
+
+    <script th:src="@{/vue/vue.min.js}"></script>
+    <script th:src="@{/antd/dist/antd.min.js}"></script>
+    <script th:src="@{/vue/moment.min.js}"></script>
+    <script th:src="@{/vue/jquery.min.js}"></script>
+
+    <style type="text/css">
+        .main {
+            background-color: #2b4b6b;
+            height: 100%;
+            width: 100%;
+        }
+        .login_box {
+            width: 450px;
+            background-color: #fff;
+            border-radius: 3px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .login_box .avator_box {
+            height: 130px;
+            width: 130px;
+            border: 1px solid #eee;
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 0 10px #ddd;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+        }
+        .login_box .avator_box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #eee;
+        }
+
+        .login_box .login_form {
+            width: 100%;
+            margin-top: 20%;
+            padding: 0 10%;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" style="width: 100vw; height: 100vh;">
+        <div class="main">
+            <div class="login_box">
+                <div class="avator_box">
+                    <img th:src="@{/img/logo.png}" />
+                </div>
+                <div class="login_form">
+                    <form id="userForm" th:action="@{/doLogin}" method="post" style="display: none;">
+                        <input name="username" :value="form.username">
+                        <input name="password" type="password" :value="form.password">
+                        <input name="code" :value="form.code">
+                        <input name="timestamp" :value="currdatetime">
+                    </form>
+
+                    <a-form-model ref="loginForm" :model="form" :rules="rules" @keyup.enter.native="handleSubmit">
+                        <a-form-model-item ref="username" prop="username">
+                            <a-input v-model="form.username" size="large" placeholder="请输入登录账号">
+                                <a-icon
+                                        slot="prefix"
+                                        type="user"
+                                        :style="{ color: 'rgba(0,0,0,.25)' }"
+                                />
+                            </a-input>
+                        </a-form-model-item>
+
+                        <a-form-model-item ref="password" prop="password">
+                            <a-input v-model="form.password" type="password" size="large" placeholder="请输入密码">
+                                <a-icon
+                                        slot="prefix"
+                                        type="lock"
+                                        :style="{ color: 'rgba(0,0,0,.25)' }"
+                                />
+                            </a-input>
+                        </a-form-model-item>
+
+                        <a-form-model-item ref="code" prop="code">
+                            <a-row>
+                                <a-col :span="16">
+                                    <a-input v-model="form.code" size="large" placeholder="请输入验证码"></a-input>
+                                </a-col>
+                                <a-col :span="8" style="text-align: right;">
+                                    <img v-if="requestCodeSuccess" :src="randCodeImage" @click="handleChangeCheckCode"/>
+                                    <img v-else th:src="@{/img/checkcode.png}" @click="handleChangeCheckCode"/>
+                                </a-col>
+                            </a-row>
+
+                        </a-form-model-item>
+
+                        <a-form-model-item>
+                            <a-button type="primary" @click="handleSubmit" size="large" style="width: 100%;">
+                                登录
+                            </a-button>
+                        </a-form-model-item>
+                    </a-form-model>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        var vue = new Vue({
+            el: '#app',
+            data: {
+                form: {
+                    username: '',
+                    password: '',
+                    code: ''
+                },
+                rules: {
+                    username: [{required: true, message: '请输入登录账号'}],
+                    password: [{required: true, message: '请输入密码'}],
+                    code: [{required: true, message: '请输入验证码'}]
+                },
+                currdatetime: '',
+                requestCodeSuccess: false,
+                randCodeImage: ''
+            },
+            created: function(){
+                this.handleChangeCheckCode()
+
+                var error = this.getUrlParam('error');
+                if(error){
+                    if(error == 'codeError'){
+                        this.$notification.error({
+                            message: '登录失败',
+                            description: '验证码错误'
+                        })
+                    }else{
+                        this.$notification.error({
+                            message: '登录失败',
+                            description: '账号或者密码错误'
+                        })
+                    }
+                }
+            },
+            methods: {
+                handleChangeCheckCode: function() {
+                    this.currdatetime = new Date().getTime();
+                    var that = this
+                    $.get('/code/' + this.currdatetime, function(res){
+                        if(res.success){
+                            that.randCodeImage = res.data
+                            that.requestCodeSuccess=true
+                        }else{
+                            that.$message.error(res.message)
+                            that.requestCodeSuccess=false
+                        }
+                    },'json')
+                },
+                handleSubmit: function(){
+                    this.$refs.loginForm.validate(function(valid){
+                        if(valid){
+                            $('#userForm').submit()
+                        }
+                    })
+                },
+                getUrlParam: function (paraName) {
+                    var url = document.location.toString();
+                    var arrObj = url.split("?");
+
+                    if (arrObj.length > 1) {
+                        var arrPara = arrObj[1].split("&");
+                        var arr;
+
+                        for (var i = 0; i < arrPara.length; i++) {
+                            arr = arrPara[i].split("=");
+
+                            if (arr != null && arr[0] == paraName) {
+                                return arr[1];
+                            }
+                        }
+                        return "";
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

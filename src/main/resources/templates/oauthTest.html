@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>授权接口测试</title>
+
+    <link th:href="@{/antd/dist/antd.css}" rel="stylesheet">
+
+    <script th:src="@{/vue/vue.min.js}"></script>
+    <script th:src="@{/antd/dist/antd.min.js}"></script>
+    <script th:src="@{/vue/moment.min.js}"></script>
+    <script th:src="@{/vue/jquery.min.js}"></script>
+
+    <style>
+        .ant-collapse-content{
+            background-color: #b4e0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" style="width: 100vw; height: 100vh;background-color: #b4e0ff;">
+        <div style="width: 50%;padding-top:20px;">
+            <a-form-model :model="form" v-bind="layout" >
+                <a-row :gutter="24">
+                    <a-col :span="24">
+                        <a-form-model-item label="应用key" prop="appKey">
+                            <a-input v-model="form.appKey" placeholder="请输入应用key"></a-input>
+                        </a-form-model-item>
+                    </a-col>
+                    <a-col :span="24">
+                        <a-form-model-item label="应用密钥" prop="appSecret">
+                            <a-input v-model="form.appSecret" placeholder="请输入应用密钥"></a-input>
+                        </a-form-model-item>
+                    </a-col>
+                    <a-col :span="24">
+                        <a-form-model-item label="授权范围" prop="scope">
+                            <a-select v-model="form.scope" placeholder="请选择授权范围">
+                                <a-select-option value="read">read</a-select-option>
+                                <a-select-option value="write">write</a-select-option>
+                                <a-select-option value="read%20write">read write</a-select-option>
+                            </a-select>
+                        </a-form-model-item>
+                    </a-col>
+                    <a-col :span="24">
+                        <a-form-model-item label="redirectUri" prop="redirectUri">
+                            <a-input v-model="form.redirectUri" placeholder="请输入redirectUri"></a-input>
+                        </a-form-model-item>
+                    </a-col>
+                </a-row>
+            </a-form-model>
+        </div>
+
+        <a-collapse :active-key="activeKey">
+            <a-collapse-panel key="1" header="1.授权码模式" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">1.先获取 'code'</a-col>
+                    <a-col :span="24">
+                        请求地址：<a :href="codeUrl" target="_blank">{{codeUrl}}</a>
+                    </a-col>
+                </a-row>
+                <a-divider></a-divider>
+                <a-row>
+                    <a-col :span="24">2.通过 'code' 换取 'access_token'</a-col>
+                    <a-col :span="24">
+                        <a-form-model :model="form" v-bind="layout">
+                            <a-row :gutter="24">
+                                <a-col :span="12">
+                                    <a-form-model-item label="上一步获取到的code" prop="code" label-align="left">
+                                        <a-input v-model="form.code" placeholder="请输入上一步获取到的code"></a-input>
+                                    </a-form-model-item>
+                                </a-col>
+                            </a-row>
+                        </a-form-model>
+                    </a-col>
+                    <a-col :span="24">
+                        请求地址：<a :href="codeTokenUrl" target="_blank">{{codeTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+            <a-collapse-panel key="2" header="2.密码模式" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">请输入账号、密码 后点击链接地址</a-col>
+                    <a-col :span="12">
+                        <a-form-model :model="form" v-bind="layout">
+                            <a-row :gutter="24">
+                                <a-col :span="24">
+                                    <a-form-model-item label="账号" prop="account" label-align="left">
+                                        <a-input v-model="form.account" placeholder="请输入账号"></a-input>
+                                    </a-form-model-item>
+                                </a-col>
+                                <a-col :span="24">
+                                    <a-form-model-item label="密码" prop="password" label-align="left">
+                                        <a-input v-model="form.password" placeholder="请输入密码"></a-input>
+                                    </a-form-model-item>
+                                </a-col>
+                            </a-row>
+                        </a-form-model>
+                    </a-col>
+                    <a-col :span="24">
+                        请求地址：<a :href="passwordTokenUrl" target="_blank">{{passwordTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+            <a-collapse-panel key="3" header="3.隐式授权" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">
+                        请求地址：<a :href="implicitTokenUrl" target="_blank">{{implicitTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+            <a-collapse-panel key="4" header="4.客户端凭证模式" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">
+                        请求地址：<a :href="clientTokenUrl" target="_blank">{{clientTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+            <a-collapse-panel key="5" header="5.refresh_token（用于获取新的access_token）" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">请输入refresh_token后点击链接地址</a-col>
+                    <a-col :span="24">
+                        <a-form-model :model="form" v-bind="layout">
+                            <a-row :gutter="24">
+                                <a-col :span="12">
+                                    <a-form-model-item label="refresh_token" prop="refreshToken" label-align="left">
+                                        <a-input v-model="form.refreshToken" placeholder="请输入refresh_token"></a-input>
+                                    </a-form-model-item>
+                                </a-col>
+                            </a-row>
+                        </a-form-model>
+                    </a-col>
+                    <a-col :span="24">
+                        请求地址：<a :href="refreshTokenUrl" target="_blank">{{refreshTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+            <a-collapse-panel key="6" header="6.check_token（检测当前access_token是否有效）" :show-arrow="false">
+                <a-row>
+                    <a-col :span="24">请输入access_token后点击链接地址</a-col>
+                    <a-col :span="24">
+                        <a-form-model :model="form" v-bind="layout">
+                            <a-row :gutter="24">
+                                <a-col :span="12">
+                                    <a-form-model-item label="access_token" prop="accessToken" label-align="left">
+                                        <a-input v-model="form.accessToken" placeholder="请输入access_token"></a-input>
+                                    </a-form-model-item>
+                                </a-col>
+                            </a-row>
+                        </a-form-model>
+                    </a-col>
+                    <a-col :span="24">
+                        请求地址：<a :href="checkTokenUrl" target="_blank">{{checkTokenUrl}}</a>
+                    </a-col>
+                </a-row>
+            </a-collapse-panel>
+        </a-collapse>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                activeKey: ['1','2','3','4','5','6'],
+                layout: {
+                    labelCol: {span: 5},
+                    wrapperCol: {span: 16}
+                },
+                form: {
+                    appKey: '',
+                    appSecret: '',
+                    scope: '',
+                    redirectUri: '',
+                    code: '',
+                    account: '',
+                    password: '',
+                    refreshToken: '',
+                    accessToken: ''
+                }
+            },
+            computed: {
+                codeUrl: function(){
+                    return '/oauth/authorize?client_id=' + this.form.appKey + '&redirect_uri=' + this.form.redirectUri
+                        + '&response_type=code&scope=' + this.form.scope
+                },
+                codeTokenUrl: function(){
+                    return '/oauth/token?client_id=' + this.form.appKey + '&client_secret=' + this.form.appSecret
+                        + '&grant_type=authorization_code&code=' + this.form.code + '&redirect_uri=' + this.form.redirectUri
+                },
+                passwordTokenUrl: function(){
+                    return '/oauth/token?client_id=' + this.form.appKey + '&client_secret=' + this.form.appSecret
+                        + '&grant_type=password&username=' + this.form.account + '&password=' + this.form.password + '&scope=' + this.form.scope
+                },
+                implicitTokenUrl: function(){
+                    return '/oauth/authorize?client_id=' + this.form.appKey + '&response_type=token&redirect_uri=' + this.form.redirectUri + '&scope=' + this.form.scope
+                },
+                clientTokenUrl: function(){
+                    return '/oauth/token?client_id=' + this.form.appKey + '&client_secret=' + this.form.appSecret
+                        + '&grant_type=client_credentials&scope=' + this.form.scope
+                },
+                refreshTokenUrl: function(){
+                    return '/oauth/token?client_id=' + this.form.appKey + '&client_secret=' + this.form.appSecret
+                        + '&grant_type=refresh_token&refresh_token=' + this.form.refreshToken
+                },
+                checkTokenUrl: function(){
+                    return '/oauth/check_token?client_id=' + this.form.appKey + '&token=' + this.form.accessToken
+                }
+            }
+        })
+    </script>
+</body>
+</html>

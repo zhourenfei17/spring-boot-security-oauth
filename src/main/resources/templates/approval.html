@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户授权</title>
+
+    <link th:href="@{/antd/dist/antd.css}" rel="stylesheet">
+
+    <script th:src="@{/vue/vue.min.js}"></script>
+    <script th:src="@{/antd/dist/antd.min.js}"></script>
+    <script th:src="@{/vue/moment.min.js}"></script>
+    <script th:src="@{/vue/jquery.min.js}"></script>
+
+    <style>
+        .foot-btn{
+            width: 49%;
+            border: 0px;
+            margin: 0;
+            padding: 15px;
+            background-color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+        }
+        .success-btn{
+            border-left: 1px solid #e8e8e8;
+            color: #60b760;
+        }
+        .ant-modal-footer{
+            padding: 0;
+        }
+        p{
+            margin-bottom: 0;
+        }
+        .auth-msg .ant-badge-status-text{
+            color: #949494;
+            font-size: 16px;
+        }
+        .ant-modal-footer button + button{
+            margin-left: 0px;
+        }
+        .ant-modal-mask{
+            background-color: #313131;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <a-modal :visible="true" :maskClosable="false" :closable="false">
+            <template slot="title">
+                <p style="text-align: center;font-size: 24px;color:#525252;">用户授权</p>
+            </template>
+            <a-row style="text-align: center;padding-bottom: 20px;">
+                <a-icon type="appstore" theme="twoTone" two-tone-color="#52c41a" style="font-size: 40px;"></a-icon>
+            </a-row>
+            <a-row>
+                <p style="font-size: 20px;font-weight: bold;color:#525252;"><span th:text="${appName}"></span> 申请获得以下权限</p>
+            </a-row>
+            <a-divider></a-divider>
+            <a-row>
+                <a-badge th:if="${get}" color="#ccc" text="获得你的公开信息（姓名、手机号、性别、角色）" class="auth-msg"></a-badge>
+                <a-badge th:if="${update}" color="#ccc" text="获得修改用户名权限" class="auth-msg"></a-badge>
+            </a-row>
+            <template slot="footer" >
+                <span class="foot-btn" @click="refuse">拒绝</span>
+                <span class="foot-btn success-btn" @click="agree">允许</span>
+            </template>
+        </a-modal>
+
+        <form id="approvalForm" action="/oauth/authorize" method="post" style="display: none;">
+            <a-input name="user_oauth_approval" :value="approval"/>
+        </form>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                approval: false
+            },
+            methods: {
+                agree: function(){
+                    this.approval = true
+                    setTimeout(function(){
+                        $('#approvalForm').submit()
+                    },200)
+                },
+                refuse: function(){
+                    this.approval = false
+                    setTimeout(function(){
+                        $('#approvalForm').submit()
+                    },200)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

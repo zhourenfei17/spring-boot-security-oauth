@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>资源服务器接口测试</title>
+
+    <link th:href="@{/antd/dist/antd.css}" rel="stylesheet">
+
+    <script th:src="@{/vue/vue.min.js}"></script>
+    <script th:src="@{/antd/dist/antd.min.js}"></script>
+    <script th:src="@{/vue/moment.min.js}"></script>
+    <script th:src="@{/vue/jquery.min.js}"></script>
+
+    <style>
+        .ant-collapse-content{
+            background-color: #b4e0ff;
+        }
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100vw; height: 100vh;background-color: #b4e0ff;">
+    <div style="width: 50%;padding-top:20px;">
+        <a-form-model :model="form" v-bind="layout" >
+            <a-row :gutter="24">
+                <a-col :span="24">
+                    <a-form-model-item label="access_token" prop="accessToken">
+                        <a-input v-model="form.accessToken" placeholder="请输入access_token"></a-input>
+                    </a-form-model-item>
+                </a-col>
+            </a-row>
+        </a-form-model>
+    </div>
+
+    <a-row>
+        <a-col :span="24" style="padding: 20px 0;">
+            <a-alert banner message="tip:为了方便，这边使用GET请求，并且将token采用url参数形式传递；实际项目中可能将token放在请求头中，参数名为Authorization，参数值需要以Bearer开头，请参考OauthTokenExtractor，示例 Authorization: Bearer 27e0984e-5aa2-4b3c-8182-74a0f890b59d"></a-alert>
+        </a-col>
+    </a-row>
+
+    <a-collapse :active-key="activeKey">
+        <a-collapse-panel key="1" header="1.获取用户信息（需要授权范围：read）" :show-arrow="false">
+            <a-row>
+                <a-col :span="24">
+                    请求地址：<a :href="getUserInfoUrl" target="_blank">{{getUserInfoUrl}}</a>
+                </a-col>
+            </a-row>
+        </a-collapse-panel>
+        <a-collapse-panel key="2" header="2.修改用户姓名（需要授权范围：write，需要用户角色代码：admin）" :show-arrow="false">
+            <a-row>
+                <a-col :span="24">请输入修改后的用户姓名 后点击链接地址</a-col>
+                <a-col :span="24">
+                    <a-form-model :model="form" v-bind="layout">
+                        <a-row :gutter="24">
+                            <a-col :span="12">
+                                <a-form-model-item label="用户姓名" prop="username" label-align="left">
+                                    <a-input v-model="form.username" placeholder="请输入用户姓名"></a-input>
+                                </a-form-model-item>
+                            </a-col>
+                        </a-row>
+                    </a-form-model>
+                </a-col>
+                <a-col :span="24">
+                    请求地址：<a :href="updateUserInfoUrl" target="_blank">{{updateUserInfoUrl}}</a>
+                </a-col>
+            </a-row>
+        </a-collapse-panel>
+    </a-collapse>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            activeKey: ['1','2'],
+            layout: {
+                labelCol: {span: 5},
+                wrapperCol: {span: 16}
+            },
+            form: {
+                username: '',
+                accessToken: ''
+            }
+        },
+        computed: {
+            getUserInfoUrl: function(){
+                return '/get/userInfo?access_token=' + this.form.accessToken
+            },
+            updateUserInfoUrl: function(){
+                return '/update/username?access_token=' + this.form.accessToken + '&username=' + this.form.username
+            }
+        }
+    })
+</script>
+</body>
+</html>
