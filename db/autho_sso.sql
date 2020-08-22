@@ -1,17 +1,3 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : away
-Source Server Version : 50729
-Source Host           : 47.98.33.15:3306
-Source Database       : autho_sso
-
-Target Server Type    : MYSQL
-Target Server Version : 50729
-File Encoding         : 65001
-
-Date: 2020-08-18 17:51:07
-*/
 
 SET FOREIGN_KEY_CHECKS=0;
 
