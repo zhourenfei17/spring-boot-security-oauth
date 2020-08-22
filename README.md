@@ -1,4 +1,4 @@
-###SpringBoot2集成Security、Oauth、redis、mybatis实现统一认证 服务端
+### SpringBoot2集成Security、Oauth、redis、mybatis实现统一认证 服务端
 
 [博客地址](https://blog.csdn.net/zhourenfei17/article/details/108022884)
 
